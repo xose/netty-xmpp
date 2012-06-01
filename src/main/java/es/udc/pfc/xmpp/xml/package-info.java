@@ -17,5 +17,7 @@
 /**
  * XML support classes.
  */
+@ParametersAreNonnullByDefault
 package es.udc.pfc.xmpp.xml;
 
+import javax.annotation.ParametersAreNonnullByDefault;

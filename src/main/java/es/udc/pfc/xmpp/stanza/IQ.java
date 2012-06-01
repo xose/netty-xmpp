@@ -26,6 +26,13 @@ import es.udc.pfc.xmpp.xml.XMLElement;
  * @see <a href="http://xmpp.org/rfcs/rfc6120.html#stanzas-semantics-iq">RFC 6120 - Section 8.2.3</a>
  */
 public class IQ extends Stanza {
+	
+	private static final String rid;
+	private static int cid = 1;
+	
+	static {
+		rid = Long.toHexString(Double.doubleToLongBits(Math.random()));
+	}
 
 	/**
 	 * Possible <i>type</i> values for IQs.
@@ -55,6 +62,14 @@ public class IQ extends Stanza {
 	public IQ(final Type type) {
 		super("iq");
 		setType(type);
+		setRandomID();
+	}
+	
+	/**
+	 * Sets a random ID for this Stanza.
+	 */
+	public final void setRandomID() {
+		setId(rid + '-' + cid++);
 	}
 
 	/**

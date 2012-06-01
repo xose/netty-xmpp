@@ -70,6 +70,8 @@ public final class XMPPNamespaces {
 	public static final String MUC_OWNER = "http://jabber.org/protocol/muc#owner";
 	/** {@value} */
 	public static final String MUC_USER = "http://jabber.org/protocol/muc#user";
+	/** {@value} */
+	public static final String MUC_UNIQUE = "http://jabber.org/protocol/muc#unique";
 
 	/** {@value} */
 	public static final String HTTPBIND = "http://jabber.org/protocol/httpbind";

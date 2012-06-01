@@ -17,5 +17,7 @@
 /**
  * XMPP stanzas.
  */
+@ParametersAreNonnullByDefault
 package es.udc.pfc.xmpp.stanza;
 
+import javax.annotation.ParametersAreNonnullByDefault;

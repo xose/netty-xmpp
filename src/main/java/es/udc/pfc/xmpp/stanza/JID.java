@@ -24,7 +24,6 @@ import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 
 import com.google.common.base.Objects;
-import com.google.common.base.Strings;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -49,11 +48,11 @@ public final class JID {
 			final int atIndex = uri.indexOf('@');
 			final int barIndex = uri.indexOf('/', atIndex + 1);
 			if (atIndex == 0)
-				throw new Exception("Node cannot be empty");
+				throw new IllegalArgumentException("Node cannot be empty");
 			if (barIndex > 0 && barIndex - atIndex <= 1)
-				throw new Exception("Domain cannot be empty");
+				throw new IllegalArgumentException("Domain cannot be empty");
 			if (barIndex == uri.length() - 1)
-				throw new Exception("Resource cannot be empty");
+				throw new IllegalArgumentException("Resource cannot be empty");
 			
 			if (atIndex > 0) {
 				node = uri.substring(0, atIndex);
@@ -87,10 +86,10 @@ public final class JID {
 	 * @return a JID if it is a valid JID string, {@code null} otherwise
 	 */
 	@Nullable
-	public static final JID jid(final String uri) {
-		if (Strings.isNullOrEmpty(uri))
+	public static final JID jid(@Nullable final String uri) {
+		if (uri == null || uri.isEmpty())
 			return null;
-
+		
 		try {
 			return cache.get(uri);
 		} catch (ExecutionException e) {
@@ -172,7 +171,7 @@ public final class JID {
 	}
 
 	@Override
-	public final boolean equals(final Object obj) {
+	public final boolean equals(@Nullable final Object obj) {
 		if (obj instanceof JID) {
 			final JID other = (JID) obj;
 

@@ -68,6 +68,10 @@ public class XMPPStreamHandler extends SimpleChannelHandler {
 		Channels.write(ctx, e.getFuture(), ChannelBuffers.copiedBuffer(e.getMessage().toString(), CharsetUtil.UTF_8));
 	}
 	
+	public void loggedIn() {
+		callback.connected();
+	}
+	
 	@Override
 	public void disconnectRequested(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception {
 		callback.willDisconnect();

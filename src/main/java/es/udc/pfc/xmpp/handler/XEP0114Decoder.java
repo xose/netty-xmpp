@@ -16,6 +16,8 @@
 
 package es.udc.pfc.xmpp.handler;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.EndElement;
@@ -47,24 +49,25 @@ public class XEP0114Decoder extends SimpleChannelHandler {
 		CONNECT, AUTHENTICATE, READY, DISCONNECTED;
 	}
 
+	private final String serverName;
+	private final String secret;
 	private Status status;
-	private String serverName;
-	private String secret;
 	private String streamID;
 
 	public XEP0114Decoder(String serverName, String secret) throws XMLStreamException {
 		super();
+		
+		this.serverName = checkNotNull(serverName);
+		this.secret = checkNotNull(secret);
+		
 		status = Status.CONNECT;
-
-		this.serverName = serverName;
-		this.secret = secret;
 	}
 
 	@Override
 	public void channelConnected(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception {
 		Channels.write(ctx.getChannel(), ChannelBuffers.copiedBuffer("<stream:stream xmlns='jabber:component:accept' xmlns:stream='http://etherx.jabber.org/streams' to='" + serverName + "'>", CharsetUtil.UTF_8));
 
-		ctx.sendUpstream(e);
+		//ctx.sendUpstream(e);
 	}
 
 	@Override
@@ -96,7 +99,6 @@ public class XEP0114Decoder extends SimpleChannelHandler {
 					final EndElement element = event.asEndElement();
 
 					if (STREAM_NAME.equals(element.getName())) {
-						System.out.println("end of stream");
 						Channels.disconnect(ctx.getChannel());
 						return;
 					}
@@ -115,6 +117,9 @@ public class XEP0114Decoder extends SimpleChannelHandler {
 					throw new Exception("expected handshake");
 				status = Status.READY;
 				System.out.println("logged in");
+				
+				ctx.getPipeline().get(XMPPStreamHandler.class).loggedIn();
+				
 				break;
 			case READY:
 				final Stanza stanza = Stanza.fromElement(element);
@@ -135,8 +140,6 @@ public class XEP0114Decoder extends SimpleChannelHandler {
 	@Override
 	public void disconnectRequested(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception {
 		Channels.write(ctx, e.getFuture(), ChannelBuffers.copiedBuffer("</stream:stream>", CharsetUtil.UTF_8));
-
-		//ctx.sendDownstream(e);
 	}
 
 }

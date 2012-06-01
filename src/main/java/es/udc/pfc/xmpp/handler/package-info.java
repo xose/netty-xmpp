@@ -17,5 +17,7 @@
 /**
  * Netty XMPP handlers.
  */
+@ParametersAreNonnullByDefault
 package es.udc.pfc.xmpp.handler;
 
+import javax.annotation.ParametersAreNonnullByDefault;

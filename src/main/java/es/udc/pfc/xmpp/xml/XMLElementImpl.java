@@ -19,6 +19,8 @@ package es.udc.pfc.xmpp.xml;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import javax.annotation.Nullable;
+
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -42,7 +44,7 @@ public final class XMLElementImpl implements XMLElement {
 		this(name, null);
 	}
 
-	protected XMLElementImpl(final String name, final String namespace) {
+	protected XMLElementImpl(final String name, @Nullable final String namespace) {
 		document = XMLUtil.newDocument();
 		if (namespace != null) {
 			element = document.createElementNS(namespace, name);
@@ -68,6 +70,7 @@ public final class XMLElementImpl implements XMLElement {
 	}
 
 	@Override
+	@Nullable
 	public XMLElement getParent() {
 		final Node parent = element.getParentNode();
 		if (parent == null || !(parent instanceof Element))
@@ -98,6 +101,7 @@ public final class XMLElementImpl implements XMLElement {
 	}
 	
 	@Override
+	@Nullable
 	public String getAttribute(final String name) {
 		checkNotNull(name);
 
@@ -108,7 +112,7 @@ public final class XMLElementImpl implements XMLElement {
 	}
 
 	@Override
-	public void setAttribute(final String name, final String value) {
+	public void setAttribute(final String name, @Nullable final String value) {
 		checkNotNull(name);
 
 		if (value != null) {
@@ -134,7 +138,7 @@ public final class XMLElementImpl implements XMLElement {
 	}
 
 	@Override
-	public XMLElement addChild(final String name, final String namespace) {
+	public XMLElement addChild(final String name, @Nullable final String namespace) {
 		final Element newElement;
 		if (namespace != null) {
 			newElement = document.createElementNS(namespace, checkNotNull(name));
@@ -155,11 +159,13 @@ public final class XMLElementImpl implements XMLElement {
 	}
 
 	@Override
+	@Nullable
 	public XMLElement getFirstChild(final String name) {
 		return getFirstChild(name, "*");
 	}
 
 	@Override
+	@Nullable
 	public XMLElement getFirstChild(final String name, final String namespace) {
 		checkNotNull(name);
 		checkNotNull(namespace);
@@ -187,6 +193,7 @@ public final class XMLElementImpl implements XMLElement {
 	}
 
 	@Override
+	@Nullable
 	public XMLElement getFirstChild(final Predicate<XMLElement> matcher) {
 		checkNotNull(matcher);
 
@@ -265,11 +272,13 @@ public final class XMLElementImpl implements XMLElement {
 	}
 
 	@Override
+	@Nullable
 	public String getChildText(final String name) {
 		return getChildText(name, "*");
 	}
 
 	@Override
+	@Nullable
 	public String getChildText(final String name, final String namespace) {
 		final XMLElement child = getFirstChild(name, namespace);
 		if (child == null)
@@ -279,17 +288,17 @@ public final class XMLElementImpl implements XMLElement {
 	}
 
 	@Override
-	public void setText(final String text) {
+	public void setText(@Nullable final String text) {
 		element.setTextContent(text);
 	}
 
 	@Override
-	public void setChildText(final String name, final String text) {
+	public void setChildText(final String name, @Nullable final String text) {
 		setChildText(name, null, text);
 	}
 
 	@Override
-	public void setChildText(final String name, final String namespace, final String text) {
+	public void setChildText(final String name, @Nullable final String namespace, @Nullable final String text) {
 		XMLElement child = getFirstChild(name, namespace != null ? namespace : "*");
 		if (child == null) {
 			child = addChild(name, namespace);

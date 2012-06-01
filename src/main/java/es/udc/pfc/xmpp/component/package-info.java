@@ -17,5 +17,7 @@
 /**
  * XMPP Component classes.
  */
+@ParametersAreNonnullByDefault
 package es.udc.pfc.xmpp.component;
 
+import javax.annotation.ParametersAreNonnullByDefault;

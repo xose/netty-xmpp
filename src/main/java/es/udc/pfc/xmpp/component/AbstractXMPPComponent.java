@@ -25,7 +25,10 @@ import java.util.logging.Logger;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.Channels;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 
@@ -54,7 +57,7 @@ public abstract class AbstractXMPPComponent implements XMPPComponent {
 	
 	protected abstract void handleMessage(Message message);
 	protected abstract void handlePresence(Presence presence);
-	protected abstract IQ handleIQ(IQ iq);
+	protected abstract ListenableFuture<IQ> handleIQ(IQ iq);
 	
 	@Override
 	public final void init(final Channel channel, final JID serverID, final JID componentID) {
@@ -92,14 +95,18 @@ public abstract class AbstractXMPPComponent implements XMPPComponent {
 		checkNotNull(iq);
 		log.finest("Received iq: " + iq.toString());
 		if (iq.isRequest()) {
-			final IQ response = handleIQ(iq);
-			if (response == null) {
-				log.warning("No IQ response");
-				// TODO: send an error
-				return;
-			}
-			
-			send(response);
+			Futures.addCallback(handleIQ(iq), new FutureCallback<IQ>() {
+
+				@Override
+				public void onSuccess(IQ result) {
+					send(result);
+				}
+
+				@Override
+				public void onFailure(Throwable t) {
+					// TODO: send an error
+				}
+			});
 		}
 		else if (iq.isResponse()) {
 			final SettableFuture<IQ> future = futureHandlers.remove(iq.getId());
@@ -132,7 +139,7 @@ public abstract class AbstractXMPPComponent implements XMPPComponent {
 			return;
 		}
 		
-		log.info("Sending stanza: " + stanza.toString());
+		log.finest("Sending stanza: " + stanza.toString());
 		Channels.write(channel, stanza);
 	}
 	
@@ -144,9 +151,14 @@ public abstract class AbstractXMPPComponent implements XMPPComponent {
 	 */
 	public final ListenableFuture<IQ> sendIQ(final IQ iq) {
 		checkNotNull(iq);
-		checkArgument(iq.isRequest());
+		checkArgument(iq.isRequest() && !Strings.isNullOrEmpty(iq.getId()));
+		
+		if (futureHandlers.containsKey(iq.getId())) {
+			log.warning("ID " + iq.getId() + " already being handled.");
+			return futureHandlers.get(iq.getId());
+		}
+			
 		final SettableFuture<IQ> future = SettableFuture.create();
-		// TODO: set random ID if missing
 		futureHandlers.put(iq.getId(), future);
 		send(iq);
 		return future;
